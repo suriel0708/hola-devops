@@ -1,0 +1,29 @@
+name: CI/CD Docker Hub + Render
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Login Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build & Push Docker Image
+      uses: docker/build-push-action@v5
+      with:
+        push: true
+        tags: su007is038/hola-mundo-devops:latest
+
+    - name: Deploy to Render
+      run: |
+        curl -X POST https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys \
+        -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"
